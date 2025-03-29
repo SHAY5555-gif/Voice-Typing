@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SCRIBE Voice Input</title>
+  <style>
+    :root {
+      --primary: #5E35B1;
+      --primary-light: #7E57C2;
+      --primary-dark: #4527A0;
+      --error: #D32F2F;
+      --success: #388E3C;
+      --text: #333;
+      --text-light: #666;
+      --background: #fff;
+      --border: #ddd;
+    }
+
+    body {
+      width: 320px;
+      height: fit-content;
+      max-height: 600px;
+      padding: 20px;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: var(--text);
+      background: var(--background);
+      overflow-y: auto;
+    }
+
+    .header {
+      display: flex; /* Use flexbox */
+      align-items: center; /* Vertically center */
+      justify-content: space-between; /* Space items out */
+      margin-bottom: 16px;
+      /* height: 36px; Removed */
+      /* position: relative; Removed */
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      /* position: absolute; Removed */
+      /* right: 20px; Removed */
+      /* top: 50%; Removed */
+      /* transform: translateY(-50%); Removed */
+      /* order: 2; Removed */
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      /* position: absolute; Removed */
+      /* left: 20px; Removed */
+      /* top: 50%; Removed */
+      /* transform: translateY(-50%); Removed */
+      /* order: 1; Removed */
+    }
+
+    .icon-button, .text-button { /* Apply base styles to both */
+      background: none;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      color: var(--text-light);
+      border-radius: 4px; /* Slightly less rounded for text button */
+      transition: background-color 0.2s;
+    }
+
+    .text-button { /* Specific styles for text button */
+       font-size: 14px;
+       padding: 4px 8px;
+    }
+
+    .icon-button:hover, .text-button:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    #recordButton {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: 24px;
+      background: var(--primary);
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background-color 0.2s;
+    }
+
+    #recordButton:hover {
+      background: var(--primary-dark);
+    }
+
+    #recordButton.recording {
+      background: var(--error);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    #status {
+      text-align: center;
+      margin: 16px 0;
+      color: var(--text-light);
+    }
+
+    #status.recording {
+      color: var(--error);
+    }
+
+    #status.processing {
+      color: var(--primary);
+    }
+
+    #result {
+      min-height: 100px;
+      max-height: 200px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      color: var(--text-light);
+      overflow-y: auto;
+    }
+
+    #result.hasText {
+      color: var(--text);
+    }
+
+    #result[contenteditable="true"] {
+        outline: 1px solid var(--primary);
+        background-color: rgba(94, 53, 177, 0.05); /* Light primary background */
+    }
+
+    .result-container {
+      /* position: relative; Removed */
+      margin-bottom: 16px;
+    }
+
+    .result-controls {
+        display: flex;
+        justify-content: flex-end; /* Align buttons to the right (LTR default) */
+        gap: 4px;
+        margin-bottom: 4px; /* Space between controls and text area */
+        height: 24px; /* Ensure consistent height */
+    }
+
+    #copyButton, #editButton { /* Style both buttons */
+      /* position: absolute; Removed */
+      /* top: 4px; Removed */
+      /* right: 4px; Removed */
+      padding: 4px; /* Smaller padding */
+      color: var(--text-light);
+      /* Inherit .icon-button styles like cursor, background, border-radius, transition */
+    }
+
+    #copyButton:disabled, #editButton:disabled { /* Disable both */
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--background);
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal.open {
+      display: block;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between; /* Default for LTR */
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .form-group input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px; /* Default margin for LTR */
+    }
+
+    .button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .button:hover {
+      background: var(--primary-dark);
+    }
+
+    /* History Styles */
+    #historyContainer {
+      margin-top: 20px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      display: none; /* Hide history by default */
+    }
+    #historyContainer.visible {
+        display: block; /* Show when class is added */
+    }
+
+    #historyContainer h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 10px 0;
+      color: var(--text);
+    }
+
+    #historyList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 150px; /* Limit height */
+      overflow-y: auto; /* Add scroll if needed */
+    }
+
+    #historyList li {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-light);
+      transition: background-color 0.2s;
+      word-wrap: break-word; /* Wrap long text */
+    }
+
+    #historyList li:last-child {
+      border-bottom: none;
+    }
+
+    #historyList li:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--text);
+    }
+
+    /* --- RTL Styles --- */
+    .rtl-layout {
+        direction: rtl;
+    }
+    .rtl-layout #copyButton {
+       right: auto;
+       left: 4px;
+    }
+    .rtl-layout .result-controls {
+        justify-content: flex-start; /* Align buttons to the left in RTL */
+    }
+    .rtl-text {
+      direction: rtl;
+      text-align: right;
+    }
+    /* Remove specific RTL rule for controls margin */
+    /* .rtl-layout .controls { ... } Removed */
+
+    /* Modal header specific RTL */
+    .rtl-layout .modal-header {
+        /* No flex-direction needed. Rely on direction:rtl and space-between */
+        justify-content: space-between;
+    }
+    .rtl-layout .modal-title {
+        text-align: right; /* Align title text right */
+    }
+    .rtl-layout .modal {
+        direction: rtl;
+    }
+    .rtl-layout .form-group {
+        /* Default alignment for groups without checkboxes */
+        margin-bottom: 16px; /* Keep original spacing */
+        /* Add clearfix */
+        overflow: hidden;
+    }
+    .rtl-layout .form-group::after { /* More robust clearfix */
+       content: "";
+       clear: both;
+       display: table;
+    }
+    /* Removed flexbox rule for form-group containing checkbox */
+
+
+    .rtl-layout .form-group label {
+        /* Default styles for non-checkbox labels */
+        display: block; /* Takes full width by default */
+        text-align: right; /* Align label text right */
+        margin-bottom: 8px; /* Keep original margin */
+        color: var(--text);
+        font-weight: 500;
+    }
+    /* Checkbox label specific adjustments for RTL */
+    .rtl-layout .form-group label:has(input[type="checkbox"]) {
+        float: right; /* Push the label itself to the right */
+        display: inline-flex; /* Use flex for internal alignment */
+        flex-direction: row; /* Default direction: input (right), span (left) in RTL */
+        align-items: center;  /* Vertically center text and checkbox */
+        width: auto;          /* Allow content width */
+        margin-bottom: 0;     /* Reset label margin */
+        cursor: pointer;      /* Make the whole label clickable */
+    }
+     /* Span styling within checkbox label - No specific styles needed */
+     .rtl-layout .form-group label:has(input[type="checkbox"]) span {
+         /* align-items handles vertical alignment */
+     }
+    /* Input styling within checkbox label */
+    .rtl-layout .form-group label:has(input[type="checkbox"]) input[type="checkbox"] {
+        margin-right: 0; /* Override default LTR margin */
+        margin-left: 8px; /* Add space between checkbox (visually right in RTL) and text (visually left in RTL) */
+        /* align-items handles vertical alignment */
+    }
+    /* Ensure select dropdown arrow is on the left in RTL */
+    .rtl-layout .form-group select {
+        background-position: left 0.5rem center;
+        padding-left: 2rem; /* Add padding for the arrow */
+        padding-right: 0.75rem; /* Reset right padding */
+    }
+
+    /* Removed #toast styles */
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="title" data-i18n="popupTitle">Voice Input</h1>
+    <div class="controls">
+       <button id="historyButton" class="text-button" title="Show/Hide History" data-i18n="historyButton">History</button>
+      <button id="helpButton" class="icon-button" title="Help" data-i18n-title="helpTitle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.5 9.5 A2.5 2.5 0 0 1 12 7 A2.5 2.5 0 0 1 14.5 9.5 C14.5 11.5 12 12.5 12 15 v1 M12 18h.01"></path> <!-- Arc curve, vertical line, move, dot -->
+        </svg>
+      </button>
+      <button id="settingsButton" class="icon-button" title="Settings" data-i18n-title="settingsTitle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <button id="recordButton">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+      <line x1="12" y1="19" x2="12" y2="23"></line>
+      <line x1="8" y1="23" x2="16" y2="23"></line>
+    </svg>
+    <span data-i18n="recordButtonStart">Start Recording</span>
+  </button>
+
+  <div id="status" data-i18n="statusInitial">Click to start recording</div>
+  <div class="result-container">
+    <div class="result-controls">
+       <button id="editButton" class="icon-button" title="Edit Text" data-i18n-title="editButtonTitle" disabled>
+         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+           <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+         </svg>
+       </button>
+       <button id="copyButton" class="icon-button" title="Copy Text" data-i18n-title="copyButtonTitle" disabled>
+         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+         </svg>
+       </button>
+     </div>
+    <div id="result" contenteditable="false" data-i18n-placeholder="resultPlaceholder">Your transcribed text will appear here</div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" data-i18n="settingsModalTitle">Settings</h2>
+      <button class="icon-button" data-close-settings>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <form id="settingsForm">
+      <div class="form-group">
+        <label for="apiKey" data-i18n="apiKeyLabel">ELEVEN LABS API Key</label>
+        <input type="password" id="apiKey" required style="width: 100%; box-sizing: border-box;">
+      </div>
+      <div class="form-group">
+        <label for="language" data-i18n="languageLabel">Language</label>
+        <select id="language">
+          <option value="en">English</option>
+          <option value="he">Hebrew (עברית)</option>
+          <option value="zh">Chinese (中文)</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="it">Italian</option>
+          <option value="pt">Portuguese</option>
+          <option value="pl">Polish</option>
+          <option value="hi">Hindi</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="checkbox-label"> <!-- Added class -->
+          <input type="checkbox" id="autoInsert" checked>
+          <span data-i18n="autoInsertLabel">Automatically insert text</span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label class="checkbox-label"> <!-- Added class -->
+          <input type="checkbox" id="autoCopy">
+          <span data-i18n="autoCopyLabel">Automatically copy text to clipboard</span>
+        </label>
+      </div>
+      <button type="submit" class="button" data-i18n="saveSettingsButton">Save Settings</button>
+    </form>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="helpModal" class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" data-i18n="helpModalTitle">Help</h2>
+      <button class="icon-button" data-close-help>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div>
+      <p><strong data-i18n="helpGettingStarted">Getting Started:</strong></p>
+      <ol>
+        <!-- Note: List items could be translated too, but keeping simple for now -->
+        <li>Enter your ELEVEN LABS API key in Settings</li>
+        <li>Click the microphone button to start recording</li>
+        <li>Speak clearly into your microphone</li>
+        <li>Click again to stop recording</li>
+        <li>Your text will appear and be inserted automatically</li>
+      </ol>
+      <p><strong data-i18n="helpKeyboardShortcut">Keyboard Shortcut:</strong> Alt+Shift+S</p>
+      <p><strong data-i18n="helpTips">Tips:</strong></p>
+      <ul>
+        <!-- Note: List items could be translated too, but keeping simple for now -->
+        <li>Speak clearly and at a normal pace</li>
+        <li>Keep background noise to a minimum</li>
+        <li>Click the settings icon to change language or behavior</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- History Section -->
+  <div id="historyContainer">
+    <h2 data-i18n="historyTitle">History (Last 5)</h2>
+    <ul id="historyList">
+      <!-- History items will be populated here -->
+    </ul>
+  </div>
+
+  <!-- Removed Toast Notification -->
+
+  <script src="popup.js"></script>
+</body>
+</html>
