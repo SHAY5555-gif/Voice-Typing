@@ -40,41 +40,11 @@ async function openPermissionPage() {
   const permissionPageUrl = chrome.runtime.getURL('microphone.html');
   console.log('Permission page URL:', permissionPageUrl);
   try {
-    console.log('Querying for existing permission tabs...');
-    const existingTabs = await chrome.tabs.query({ url: permissionPageUrl });
-    console.log('Found existing tabs:', existingTabs.length);
-
-    if (existingTabs.length > 0) {
-      const tabId = existingTabs[0].id;
-      const windowId = existingTabs[0].windowId;
-      console.log(`Found existing permission tab ${tabId} in window ${windowId}. Attempting to focus...`);
-      try {
-        await chrome.tabs.update(tabId, { active: true });
-        console.log(`Updated tab ${tabId} active state.`);
-        await chrome.windows.update(windowId, { focused: true });
-        console.log(`Focused window ${windowId}.`);
-      } catch (focusError) {
-         console.error(`Error focusing existing tab ${tabId} / window ${windowId}:`, focusError);
-         // Fallback: Try creating a new tab if focusing failed
-         console.log('Focus failed. Attempting to create new tab as fallback...');
-         try {
-           const newTab = await chrome.tabs.create({ url: permissionPageUrl });
-           console.log(`Fallback: Created new permission tab with ID ${newTab.id}.`);
-         } catch (createErrorFallback) {
-           console.error('Fallback Error: Could not create permission tab:', createErrorFallback);
-         }
-      }
-    } else {
-      console.log('No existing permission tab found. Attempting to create new one...');
-      try {
-        const newTab = await chrome.tabs.create({ url: permissionPageUrl });
-        console.log(`Successfully created new permission tab with ID ${newTab.id}.`);
-      } catch (createError) {
-         console.error('Error creating new permission tab:', createError);
-      }
-    }
+    // Simply open a new tab. Using only chrome.tabs.create does not require the "tabs" permission.
+    const newTab = await chrome.tabs.create({ url: permissionPageUrl });
+    console.log(`Created permission page tab with ID ${newTab.id}.`);
   } catch (error) {
-    console.error('General error in openPermissionPage:', error);
+    console.error('Error creating permission page tab:', error);
   }
 }
 
@@ -129,7 +99,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     console.log('Extension installed');
     // Initialize default settings
     const defaultSettings = {
-      language: 'en-US', apiKey: '', activationMode: 'manual', autoInsert: true, autoCopy: false,
+      language: 'auto', apiKey: '', activationMode: 'manual', autoInsert: true, autoCopy: false,
     };
     await chrome.storage.sync.set(defaultSettings);
     console.log('Default settings initialized');

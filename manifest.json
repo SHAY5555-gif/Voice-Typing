@@ -17,9 +17,7 @@
   },
   "permissions": [
     "storage",
-    "activeTab",
-    "microphone",
-    "tabs"
+    "microphone"
   ],
   "host_permissions": ["<all_urls>"],
   "optional_permissions": [],
