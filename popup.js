@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Defer the entire setup to ensure DOM is fully ready
   setTimeout(() => {
     // Elements
-    const recordBtn = document.getElementById('recordButton');
+const recordBtn = document.getElementById('recordButton');
+const tabRecordBtn = document.getElementById('tabRecordButton');
     const statusEl = document.getElementById('status');
     const resultEl = document.getElementById('result');
     const settingsBtn = document.getElementById('settingsButton');
@@ -128,7 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadHistory(); // Load history on popup open
 
     // Event Listeners
-    recordBtn.addEventListener('click', toggleRecording);
+recordBtn.addEventListener('click', toggleRecording);
+if (tabRecordBtn) tabRecordBtn.addEventListener('click', toggleTabRecording);
     // Defer adding the settingsForm listener slightly to ensure DOM is ready
     setTimeout(() => {
       const form = document.getElementById('settingsForm');
@@ -400,7 +402,119 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Process recording
-    async function processRecording() {
+/* ---- Tab Audio Capture Functions ---- */
+let isTabRecording = false;
+let tabMediaRecorder = null;
+let tabAudioChunks = [];
+let tabPlayback = null; // play captured audio so the tab is not muted
+
+function toggleTabRecording() {
+  if (isTabRecording) {
+    stopTabRecording();
+  } else {
+    startTabRecording();
+  }
+}
+
+function startTabRecording() {
+  if (!settings.apiKey) {
+    openSettingsModal();
+    return;
+  }
+  console.log("Popup: Starting tab audio capture...");
+  chrome.tabCapture.capture({ audio: true, video: false }, (stream) => {
+    if (chrome.runtime.lastError || !stream) {
+      console.error("Popup: tabCapture error:", chrome.runtime.lastError);
+      statusEl.textContent = getTranslation('statusError');
+      statusEl.classList.add('error');
+      return;
+    }
+    tabMediaRecorder = new MediaRecorder(stream);
+    tabAudioChunks = [];
+    tabMediaRecorder.addEventListener('dataavailable', (e) => {
+      if (e.data.size > 0) tabAudioChunks.push(e.data);
+    });
+    tabMediaRecorder.addEventListener('stop', processTabRecording);
+    tabMediaRecorder.start();
+
+    /* keep audio audible while capturing */
+    try {
+      tabPlayback = new Audio();
+      tabPlayback.srcObject = stream;
+      tabPlayback.volume = 1;
+      // play() returns a promise – ignore rejection if autoplay blocked
+      tabPlayback.play().catch(() => {});
+    } catch (e) { console.warn('Could not start tab playback', e); }
+
+    isTabRecording = true;
+    if (tabRecordBtn) tabRecordBtn.classList.add('recording');
+    statusEl.textContent = 'Recording tab audio... Click to stop';
+  });
+}
+
+function stopTabRecording() {
+  if (tabMediaRecorder && isTabRecording) {
+    tabMediaRecorder.stop();
+    tabMediaRecorder.stream.getTracks().forEach(t => t.stop());
+    isTabRecording = false;
+    if (tabRecordBtn) tabRecordBtn.classList.remove('recording');
+    statusEl.textContent = getTranslation('statusProcessing');
+    statusEl.classList.add('processing');
+
+    if (tabPlayback) {
+      tabPlayback.pause();
+      tabPlayback.srcObject = null;
+      tabPlayback = null;
+    }
+  }
+}
+
+async function processTabRecording() {
+  if (tabAudioChunks.length === 0) {
+    statusEl.textContent = getTranslation('statusError');
+    statusEl.classList.add('error');
+    return;
+  }
+  const audioBlob = new Blob(tabAudioChunks, { type: 'audio/webm;codecs=opus' });
+  tabAudioChunks = [];
+  statusEl.textContent = getTranslation('statusTranscribing');
+  try {
+    const result = await transcribeAudioWithoutEvents(audioBlob);
+    statusEl.textContent = getTranslation('statusDone');
+    if (result && result.text) {
+      resultEl.textContent = result.text;
+      resultEl.classList.add('hasText');
+
+      // --- mirror microphone flow: history / clipboard / insert ---
+      saveHistory(result.text);
+      if (copyBtn) copyBtn.disabled = false;
+      if (editBtn) editBtn.disabled = false;
+
+      if (settings.autoCopy) {
+        navigator.clipboard.writeText(result.text)
+          .catch(err => console.error('Popup: Auto-copy (tab) failed:', err));
+      }
+
+      if (settings.autoInsert) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs && tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              action: 'insertText',
+              text: result.text
+            }, () => {/* ignore errors */});
+          }
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Popup: Tab transcription error:', err);
+    statusEl.textContent = getTranslation('statusError');
+    statusEl.classList.add('error');
+  }
+}
+/* ---- End Tab Audio Capture ---- */
+
+async function processRecording() {
       console.log("Popup: processRecording started."); // Log start
       if (audioChunks.length === 0) {
         console.warn("Popup: processRecording - No audio chunks recorded."); // Log no chunks
