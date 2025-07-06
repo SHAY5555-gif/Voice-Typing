@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SCRIBE Voice Input</title>
   <style>
     :root {
@@ -17,9 +18,9 @@
     }
 
     body {
-      width: 320px;
+      width: 380px;
       height: fit-content;
-      max-height: 600px;
+      max-height: 700px;
       padding: 20px;
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -326,6 +327,127 @@
         padding-right: 0.75rem;
     }
 
+    /* Recording Section Styles */
+    .recording-section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 12px 0;
+      color: var(--text);
+    }
+
+    .recording-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .recording-option {
+      width: 100%;
+    }
+
+    .record-btn {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--background);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .record-btn:hover {
+      border-color: var(--primary-light);
+      background: rgba(94, 53, 177, 0.05);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .record-btn.primary {
+      border-color: var(--primary);
+      background: rgba(94, 53, 177, 0.08);
+    }
+
+    .record-btn.primary:hover {
+      border-color: var(--primary-dark);
+      background: rgba(94, 53, 177, 0.12);
+    }
+
+    .record-btn.recording {
+      border-color: var(--error);
+      background: rgba(211, 47, 47, 0.1);
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+      0% { 
+        border-color: var(--error);
+        box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4);
+      }
+      50% { 
+        border-color: #ff5252;
+        box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.1);
+      }
+      100% { 
+        border-color: var(--error);
+        box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4);
+      }
+    }
+
+    .btn-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .record-btn.secondary .btn-icon {
+      background: var(--text-light);
+    }
+
+    .record-btn.recording .btn-icon {
+      background: var(--error);
+    }
+
+    .btn-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .btn-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .btn-subtitle {
+      font-size: 12px;
+      color: var(--text-light);
+      line-height: 1.3;
+    }
+
+    /* RTL Styles for Recording Section */
+    .rtl-layout .record-btn {
+      text-align: right;
+    }
+
+    .rtl-layout .recording-buttons {
+      direction: rtl;
+    }
+
   </style>
 </head>
 <body class="rtl-layout"> <!-- Add rtl-layout class -->
@@ -349,15 +471,65 @@
     <h1 class="title" data-i18n="popupTitle">קלט קולי</h1>
   </div>
 
-  <button id="recordButton">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-      <line x1="12" y1="19" x2="12" y2="23"></line>
-      <line x1="8" y1="23" x2="16" y2="23"></line>
-    </svg>
-    <span data-i18n="recordButtonStart">Start Recording</span>
-  </button>
+  <!-- Recording Options Section -->
+  <div class="recording-section">
+    <h3 class="section-title" data-i18n="recordingOptions">אפשרויות הקלטה</h3>
+    
+    <div class="recording-buttons">
+      <!-- Microphone Recording -->
+      <div class="recording-option">
+        <button id="recordButton" class="record-btn primary">
+          <div class="btn-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </div>
+          <div class="btn-content">
+            <div class="btn-title" data-i18n="microphoneTitle">מיקרופון</div>
+            <div class="btn-subtitle" data-i18n="microphoneSubtitle">הקלטה ממיקרופון</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Tab Audio Recording -->
+      <div class="recording-option">
+        <button id="tabRecordButton" class="record-btn secondary">
+          <div class="btn-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="9" cy="9" r="2"></circle>
+              <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+            </svg>
+          </div>
+          <div class="btn-content">
+            <div class="btn-title" data-i18n="tabAudioTitle">אודיו כרטיסייה</div>
+            <div class="btn-subtitle" data-i18n="tabAudioSubtitle">הקלטת אודיו מהכרטיסייה הנוכחית</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Desktop Audio Recording -->
+      <div class="recording-option">
+        <button id="desktopRecordButton" class="record-btn secondary">
+          <div class="btn-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <path d="M10 4v4"></path>
+              <path d="M2 8h20"></path>
+              <path d="M6 4v4"></path>
+            </svg>
+          </div>
+          <div class="btn-content">
+            <div class="btn-title" data-i18n="desktopAudioTitle">אודיו שולחן עבודה</div>
+            <div class="btn-subtitle" data-i18n="desktopAudioSubtitle">הקלטת אודיו משולחן העבודה</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <div id="status" data-i18n="statusInitial">Click to start recording</div>
 
