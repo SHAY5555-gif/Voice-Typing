@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements
 const recordBtn = document.getElementById('recordButton');
 const tabRecordBtn = document.getElementById('tabRecordButton');
+const desktopRecordBtn = document.getElementById('desktopRecordButton');
     const statusEl = document.getElementById('status');
     const resultEl = document.getElementById('result');
     const settingsBtn = document.getElementById('settingsButton');
@@ -131,6 +132,7 @@ const tabRecordBtn = document.getElementById('tabRecordButton');
     // Event Listeners
 recordBtn.addEventListener('click', toggleRecording);
 if (tabRecordBtn) tabRecordBtn.addEventListener('click', toggleTabRecording);
+if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRecording);
     // Defer adding the settingsForm listener slightly to ensure DOM is ready
     setTimeout(() => {
       const form = document.getElementById('settingsForm');
@@ -408,6 +410,12 @@ let tabMediaRecorder = null;
 let tabAudioChunks = [];
 let tabPlayback = null; // play captured audio so the tab is not muted
 
+/* ---- Desktop Audio Capture Variables ---- */
+let isDesktopRecording = false;
+let desktopMediaRecorder = null;
+let desktopAudioChunks = [];
+let desktopPlayback = null;
+
 function toggleTabRecording() {
   if (isTabRecording) {
     stopTabRecording();
@@ -513,6 +521,92 @@ async function processTabRecording() {
   }
 }
 /* ---- End Tab Audio Capture ---- */
+
+/* ---- Desktop Audio Capture Functions ---- */
+function toggleDesktopRecording() {
+  if (isDesktopRecording) {
+    stopDesktopRecording();
+  } else {
+    startDesktopRecording();
+  }
+}
+
+async function startDesktopRecording() {
+  if (!settings.apiKey) {
+    openSettingsModal();
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: true });
+    desktopMediaRecorder = new MediaRecorder(stream);
+    desktopAudioChunks = [];
+    desktopMediaRecorder.addEventListener('dataavailable', (e) => {
+      if (e.data.size > 0) desktopAudioChunks.push(e.data);
+    });
+    desktopMediaRecorder.addEventListener('stop', processDesktopRecording);
+    desktopMediaRecorder.start();
+
+    /* For desktop capture, system audio is already audible.
+       Do NOT loop it back to avoid double-audio. */
+
+    isDesktopRecording = true;
+    if (desktopRecordBtn) desktopRecordBtn.classList.add('recording');
+    statusEl.textContent = 'Recording desktop audio... Click to stop';
+  } catch (err) {
+    console.error('Popup: desktop capture error:', err);
+    statusEl.textContent = getTranslation('statusError');
+    statusEl.classList.add('error');
+  }
+}
+
+function stopDesktopRecording() {
+  if (desktopMediaRecorder && isDesktopRecording) {
+    desktopMediaRecorder.stop();
+    desktopMediaRecorder.stream.getTracks().forEach(t => t.stop());
+    isDesktopRecording = false;
+    if (desktopRecordBtn) desktopRecordBtn.classList.remove('recording');
+    statusEl.textContent = getTranslation('statusProcessing');
+    statusEl.classList.add('processing');
+    /* no extra playback to stop */
+  }
+}
+
+async function processDesktopRecording() {
+  if (desktopAudioChunks.length === 0) {
+    statusEl.textContent = getTranslation('statusError');
+    statusEl.classList.add('error');
+    return;
+  }
+  const audioBlob = new Blob(desktopAudioChunks, { type: 'audio/webm;codecs=opus' });
+  desktopAudioChunks = [];
+  statusEl.textContent = getTranslation('statusTranscribing');
+  try {
+    const result = await transcribeAudioWithoutEvents(audioBlob);
+    statusEl.textContent = getTranslation('statusDone');
+    if (result && result.text) {
+      resultEl.textContent = result.text;
+      resultEl.classList.add('hasText');
+      saveHistory(result.text);
+      if (copyBtn) copyBtn.disabled = false;
+      if (editBtn) editBtn.disabled = false;
+      if (settings.autoCopy) {
+        navigator.clipboard.writeText(result.text).catch(() => {});
+      }
+      if (settings.autoInsert) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs && tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, { action: 'insertText', text: result.text }, () => {});
+          }
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Popup: Desktop transcription error:', err);
+    statusEl.textContent = getTranslation('statusError');
+    statusEl.classList.add('error');
+  }
+}
+/* ---- End Desktop Audio Capture ---- */
 
 async function processRecording() {
       console.log("Popup: processRecording started."); // Log start

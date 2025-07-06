@@ -18,7 +18,8 @@
   "permissions": [
     "storage",
     "microphone",
-    "tabCapture"
+    "tabCapture",
+    "desktopCapture"
   ],
   "host_permissions": [
     "https://api.elevenlabs.io/*"
