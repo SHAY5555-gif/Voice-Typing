@@ -34,6 +34,7 @@ const desktopRecordBtn = document.getElementById('desktopRecordButton');
     const languageSelect = document.getElementById('language');
     const autoInsertCheck = document.getElementById('autoInsert');
     const autoCopyCheck = document.getElementById('autoCopy'); // Added autoCopy checkbox reference
+    const pinSidePanelCheck = document.getElementById('pinSidePanel'); // Added pinSidePanel checkbox reference
 
     // Close buttons
     const closeButtons = document.querySelectorAll('[data-close-settings], [data-close-help]');
@@ -46,7 +47,8 @@ const desktopRecordBtn = document.getElementById('desktopRecordButton');
       apiKey: '',
       language: 'auto', // Default to Automatic
       autoInsert: true,
-      autoCopy: false
+      autoCopy: false,
+      pinSidePanel: false
     };
     let transcriptionHistory = []; // Added history array
 
@@ -83,6 +85,7 @@ const desktopRecordBtn = document.getElementById('desktopRecordButton');
         languageLabel: "Language",
         autoInsertLabel: "Automatically insert text",
         autoCopyLabel: "Automatically copy text to clipboard",
+        pinSidePanelLabel: "Pin side panel (keep open)",
         saveSettingsButton: "Save Settings",
         helpModalTitle: "Help",
         helpGettingStarted: "Getting Started:",
@@ -125,6 +128,7 @@ const desktopRecordBtn = document.getElementById('desktopRecordButton');
         languageLabel: "שפה",
         autoInsertLabel: "הכנס טקסט אוטומטית",
         autoCopyLabel: "העתק טקסט אוטומטית ללוח",
+        pinSidePanelLabel: "הצמד סרגל צד (לא נסגר)",
         saveSettingsButton: "שמור הגדרות",
         helpModalTitle: "עזרה",
         helpGettingStarted: "תחילת עבודה:",
@@ -188,7 +192,7 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
 
     // Load saved settings
     function loadSettings() {
-      chrome.storage.sync.get(['apiKey', 'language', 'autoInsert', 'autoCopy'], (result) => {
+      chrome.storage.sync.get(['apiKey', 'language', 'autoInsert', 'autoCopy', 'pinSidePanel'], (result) => {
         if (result.apiKey) {
           settings.apiKey = result.apiKey;
           apiKeyInput.value = result.apiKey;
@@ -210,6 +214,11 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
           autoCopyCheck.checked = result.autoCopy;
         }
 
+        if (result.pinSidePanel !== undefined) {
+          settings.pinSidePanel = result.pinSidePanel;
+          pinSidePanelCheck.checked = result.pinSidePanel;
+        }
+
         if (!settings.apiKey) {
           openSettingsModal();
         }
@@ -227,7 +236,8 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
         apiKey: apiKeyInput.value,
         language: languageSelect.value,
         autoInsert: autoInsertCheck.checked,
-        autoCopy: autoCopyCheck.checked
+        autoCopy: autoCopyCheck.checked,
+        pinSidePanel: pinSidePanelCheck.checked
       };
 
       chrome.storage.sync.set(newSettings, () => {
@@ -237,6 +247,7 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
         applyRtlStyles(settings.language);
         updateUIText(settings.language);
 
+        console.log("Settings saved:", newSettings); // Debug log
         chrome.runtime.sendMessage({ action: 'settingsSaved' }, (response) => {
           if (chrome.runtime.lastError) {
             console.error("Error notifying background script:", chrome.runtime.lastError);

@@ -13,14 +13,18 @@
       "16": "icon16.png",
       "48": "icon48.png",
       "128": "icon128.png"
-    },
-    "default_popup": "popup.html"
+    }
+  },
+  "side_panel": {
+    "default_path": "popup.html"
   },
   "permissions": [
     "storage",
     "microphone",
     "tabCapture",
-    "desktopCapture"
+    "desktopCapture",
+    "sidePanel",
+    "tabs"
   ],
   "host_permissions": [
     "https://api.elevenlabs.io/*"
