@@ -58,42 +58,24 @@ async function openPermissionPage() {
 
 // --- Main Logic Handler ---
 
-// Decides action (called by listeners) - Check pinSidePanel setting
+// Always open the side panel (pinSidePanel option removed)
 async function handleAction(triggerRecording = false) {
-  console.log('Action triggered. Checking pinSidePanel setting...');
-  
+  console.log('Action triggered. Attempting to open side panel...');
+
+  // Ensure API exists (older browsers)
+  if (!chrome.sidePanel) {
+    console.warn('Side Panel API not available, falling back to popup.');
+    openNormalPopup(triggerRecording);
+    return;
+  }
+
   try {
-    const result = await chrome.storage.sync.get(['pinSidePanel']);
-    const pinSidePanel = result.pinSidePanel || false;
-    
-    if (pinSidePanel) {
-      console.log('Pin side panel enabled. Opening side panel...');
-      
-      // Check if sidePanel API is available
-      if (!chrome.sidePanel) {
-        console.error('Side Panel API not available in this browser version');
-        openNormalPopup(triggerRecording);
-        return;
-      }
-      
-      try {
-        const currentWindow = await chrome.windows.getCurrent();
-        console.log('Opening global side panel for window', currentWindow.id);
-        await chrome.sidePanel.open({ windowId: currentWindow.id });
-        console.log('Side panel opened (global) successfully');
-      } catch (sidePanelError) {
-        console.error('Error opening side panel:', sidePanelError);
-        console.error('Side panel error details:', sidePanelError.message);
-        // Fallback to normal popup if side panel fails
-        openNormalPopup(triggerRecording);
-      }
-    } else {
-      console.log('Pin side panel disabled. Opening normal popup...');
-      openNormalPopup(triggerRecording);
-    }
-  } catch (error) {
-    console.error('Error checking pinSidePanel setting:', error);
-    // Fallback to normal popup
+    const currentWindow = await chrome.windows.getCurrent();
+    await chrome.sidePanel.open({ windowId: currentWindow.id });
+    console.log('Side panel opened via handleAction');
+  } catch (err) {
+    console.error('Error opening side panel:', err);
+    // Fallback
     openNormalPopup(triggerRecording);
   }
 }

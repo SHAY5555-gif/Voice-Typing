@@ -34,7 +34,7 @@ const desktopRecordBtn = document.getElementById('desktopRecordButton');
     const languageSelect = document.getElementById('language');
     const autoInsertCheck = document.getElementById('autoInsert');
     const autoCopyCheck = document.getElementById('autoCopy'); // Added autoCopy checkbox reference
-    const pinSidePanelCheck = document.getElementById('pinSidePanel'); // Added pinSidePanel checkbox reference
+    // pinSidePanel option removed
 
     // Close buttons
     const closeButtons = document.querySelectorAll('[data-close-settings], [data-close-help]');
@@ -48,7 +48,7 @@ const desktopRecordBtn = document.getElementById('desktopRecordButton');
       language: 'auto', // Default to Automatic
       autoInsert: true,
       autoCopy: false,
-      pinSidePanel: false
+      // pinSidePanel removed
     };
     let transcriptionHistory = []; // Added history array
 
@@ -192,7 +192,7 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
 
     // Load saved settings
     function loadSettings() {
-      chrome.storage.sync.get(['apiKey', 'language', 'autoInsert', 'autoCopy', 'pinSidePanel'], (result) => {
+      chrome.storage.sync.get(['apiKey', 'language', 'autoInsert', 'autoCopy'], (result) => {
         if (result.apiKey) {
           settings.apiKey = result.apiKey;
           apiKeyInput.value = result.apiKey;
@@ -214,10 +214,7 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
           autoCopyCheck.checked = result.autoCopy;
         }
 
-        if (result.pinSidePanel !== undefined) {
-          settings.pinSidePanel = result.pinSidePanel;
-          pinSidePanelCheck.checked = result.pinSidePanel;
-        }
+        // pinSidePanel removed
 
         if (!settings.apiKey) {
           openSettingsModal();
@@ -236,8 +233,7 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
         apiKey: apiKeyInput.value,
         language: languageSelect.value,
         autoInsert: autoInsertCheck.checked,
-        autoCopy: autoCopyCheck.checked,
-        pinSidePanel: pinSidePanelCheck.checked
+        autoCopy: autoCopyCheck.checked
       };
 
       chrome.storage.sync.set(newSettings, () => {
