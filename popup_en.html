@@ -6,15 +6,28 @@
   <title>SCRIBE Voice Input</title>
   <style>
     :root {
-      --primary: #5E35B1;
-      --primary-light: #7E57C2;
-      --primary-dark: #4527A0;
+      --primary: #7b4dff;
+      --accent: #00d2ff;
+      --primary-light: #9c6dff;
+      --primary-dark: #5a2dcc;
       --error: #D32F2F;
       --success: #388E3C;
-      --text: #333;
+      --text: #222;
       --text-light: #666;
-      --background: #fff;
-      --border: #ddd;
+      --background: rgba(255, 255, 255, 0.65);
+      --border: rgba(255, 255, 255, 0.25);
+      --card-bg: rgba(255, 255, 255, 0.35);
+      --card-border: rgba(255, 255, 255, 0.25);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: rgba(30, 30, 30, 0.55);
+        --text: #f1f1f1;
+        --text-light: #b0b0b0;
+        --card-bg: rgba(40, 40, 40, 0.35);
+        --card-border: rgba(255, 255, 255, 0.15);
+      }
     }
 
     body {
@@ -25,8 +38,41 @@
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       color: var(--text);
-      background: var(--background);
+      background: linear-gradient(135deg, #e3f2ff 0%, #f3e7ff 100%);
       overflow-y: auto;
+    }
+
+    /* Sidebar mode styles */
+    .sidebar {
+      width: 320px;
+      height: 100vh;
+      background: linear-gradient(135deg, #e3f2ff 0%, #f3e7ff 100%);
+      transition: transform 0.25s ease;
+    }
+
+    .sidebar.hidden {
+      transform: translateX(100%);
+    }
+
+    .sidebar.visible {
+      transform: translateX(0);
+    }
+
+    /* Card wrapper for sections */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
     .header {
@@ -89,13 +135,13 @@
 
     #recordButton.recording {
       background: var(--error);
-      animation: pulse 2s infinite;
+      animation: pulse 1.6s infinite;
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
+      0% { box-shadow: 0 0 0 0 rgba(123, 77, 255, 0.5); }
+      70% { box-shadow: 0 0 0 16px rgba(123, 77, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(123, 77, 255, 0); }
     }
 
     #status {
@@ -168,6 +214,12 @@
 
     .modal.open {
       display: block;
+      animation: modalFade 0.25s ease-out;
+    }
+
+    @keyframes modalFade {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
     .modal-header {
@@ -403,82 +455,88 @@
   </div>
 
   <!-- Recording Options Section -->
-  <div class="recording-section">
-    <h3 class="section-title" data-i18n="recordingOptions">Recording Options</h3>
-    
-    <div class="recording-buttons">
-      <!-- Microphone Recording -->
-      <div class="recording-option">
-        <button id="recordButton" class="record-btn primary">
-          <div class="btn-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-              <line x1="12" y1="19" x2="12" y2="23"></line>
-              <line x1="8" y1="23" x2="16" y2="23"></line>
-            </svg>
-          </div>
-          <div class="btn-content">
-            <div class="btn-title" data-i18n="microphoneTitle">Microphone</div>
-            <div class="btn-subtitle" data-i18n="microphoneSubtitle">Record from microphone</div>
-          </div>
-        </button>
-      </div>
+  <section class="card">
+    <div class="recording-section">
+      <h3 class="section-title" data-i18n="recordingOptions">Recording Options</h3>
+      
+      <div class="recording-buttons">
+        <!-- Microphone Recording -->
+        <div class="recording-option">
+          <button id="recordButton" class="record-btn primary">
+            <div class="btn-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </div>
+            <div class="btn-content">
+              <div class="btn-title" data-i18n="microphoneTitle">Microphone</div>
+              <div class="btn-subtitle" data-i18n="microphoneSubtitle">Record from microphone</div>
+            </div>
+          </button>
+        </div>
 
-      <!-- Tab Audio Recording -->
-      <div class="recording-option">
-        <button id="tabRecordButton" class="record-btn secondary">
-          <div class="btn-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-              <circle cx="9" cy="9" r="2"></circle>
-              <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
-            </svg>
-          </div>
-          <div class="btn-content">
-            <div class="btn-title" data-i18n="tabAudioTitle">Tab Audio</div>
-            <div class="btn-subtitle" data-i18n="tabAudioSubtitle">Record audio from current tab</div>
-          </div>
-        </button>
-      </div>
+        <!-- Tab Audio Recording -->
+        <div class="recording-option">
+          <button id="tabRecordButton" class="record-btn secondary">
+            <div class="btn-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="9" cy="9" r="2"></circle>
+                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+              </svg>
+            </div>
+            <div class="btn-content">
+              <div class="btn-title" data-i18n="tabAudioTitle">Tab Audio</div>
+              <div class="btn-subtitle" data-i18n="tabAudioSubtitle">Record audio from current tab</div>
+            </div>
+          </button>
+        </div>
 
-      <!-- Desktop Audio Recording -->
-      <div class="recording-option">
-        <button id="desktopRecordButton" class="record-btn secondary">
-          <div class="btn-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-              <path d="M10 4v4"></path>
-              <path d="M2 8h20"></path>
-              <path d="M6 4v4"></path>
-            </svg>
-          </div>
-          <div class="btn-content">
-            <div class="btn-title" data-i18n="desktopAudioTitle">Desktop Audio</div>
-            <div class="btn-subtitle" data-i18n="desktopAudioSubtitle">Record audio from desktop</div>
-          </div>
-        </button>
+        <!-- Desktop Audio Recording -->
+        <div class="recording-option">
+          <button id="desktopRecordButton" class="record-btn secondary">
+            <div class="btn-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <path d="M10 4v4"></path>
+                <path d="M2 8h20"></path>
+                <path d="M6 4v4"></path>
+              </svg>
+            </div>
+            <div class="btn-content">
+              <div class="btn-title" data-i18n="desktopAudioTitle">Desktop Audio</div>
+              <div class="btn-subtitle" data-i18n="desktopAudioSubtitle">Record audio from desktop</div>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
   <div id="status" data-i18n="statusInitial">Click to start recording</div>
-  <div class="result-container">
-    <div class="result-controls">
-       <button id="editButton" class="icon-button" title="Edit Text" data-i18n-title="editButtonTitle" disabled>
-         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-           <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-         </svg>
-       </button>
-       <button id="copyButton" class="icon-button" title="Copy Text" data-i18n-title="copyButtonTitle" disabled>
-         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-         </svg>
-       </button>
-     </div>
-    <div id="result" contenteditable="false" data-i18n-placeholder="resultPlaceholder">Your transcribed text will appear here</div>
-  </div>
+  
+  <!-- Result Section -->
+  <section class="card">
+    <div class="result-container">
+      <div class="result-controls">
+         <button id="editButton" class="icon-button" title="Edit Text" data-i18n-title="editButtonTitle" disabled>
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+           </svg>
+         </button>
+         <button id="copyButton" class="icon-button" title="Copy Text" data-i18n-title="copyButtonTitle" disabled>
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+           </svg>
+         </button>
+       </div>
+      <div id="result" contenteditable="false" data-i18n-placeholder="resultPlaceholder">Your transcribed text will appear here</div>
+    </div>
+  </section>
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="modal">
@@ -559,12 +617,12 @@
   </div>
 
   <!-- History Section -->
-  <div id="historyContainer">
+  <section class="card" id="historyContainer">
     <h2 data-i18n="historyTitle">History (Last 5)</h2>
     <ul id="historyList">
       <!-- History items will be populated here -->
     </ul>
-  </div>
+  </section>
 
   <script src="popup.js"></script>
 </body>

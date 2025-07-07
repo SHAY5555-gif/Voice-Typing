@@ -2,78 +2,130 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Microphone Access Required</title>
   <style>
+    :root {
+      --primary: #7b4dff;
+      --accent: #00d2ff;
+      --primary-light: #9c6dff;
+      --primary-dark: #5a2dcc;
+      --error: #D32F2F;
+      --success: #388E3C;
+      --text: #222;
+      --text-light: #666;
+      --background: rgba(255, 255, 255, 0.65);
+      --card-bg: rgba(255, 255, 255, 0.35);
+      --card-border: rgba(255, 255, 255, 0.25);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: rgba(30, 30, 30, 0.55);
+        --text: #f1f1f1;
+        --text-light: #b0b0b0;
+        --card-bg: rgba(40, 40, 40, 0.35);
+        --card-border: rgba(255, 255, 255, 0.15);
+      }
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       max-width: 600px;
       margin: 40px auto;
       padding: 20px;
       text-align: center;
-      color: #333;
+      color: var(--text);
+      background: linear-gradient(135deg, #e3f2ff 0%, #f3e7ff 100%);
+      min-height: 100vh;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      padding: 32px;
+      margin: 40px auto;
+      transition: all 0.2s ease;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
     .icon {
       width: 128px;
       height: 128px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
     }
 
     h1 {
-      color: #5E35B1;
-      margin-bottom: 20px;
+      color: var(--primary);
+      margin-bottom: 24px;
+      font-size: clamp(1.5rem, 2vw + 0.5rem, 2rem);
+      font-weight: 600;
     }
 
     .description {
       line-height: 1.6;
-      margin-bottom: 30px;
+      margin-bottom: 32px;
+      color: var(--text);
+      font-size: 16px;
     }
 
     .button {
-      background: #5E35B1;
+      background: var(--primary);
       color: white;
       border: none;
-      padding: 12px 24px;
+      padding: 16px 32px;
       border-radius: 24px;
       font-size: 16px;
       font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(123, 77, 255, 0.3);
     }
 
     .button:hover {
-      background: #4527A0;
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(123, 77, 255, 0.4);
     }
 
     .status {
-      margin-top: 20px;
-      padding: 10px;
-      border-radius: 4px;
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 12px;
       display: none;
+      font-weight: 500;
     }
 
     .status.error {
-      background: #ffebee;
-      color: #c62828;
+      background: rgba(211, 47, 47, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(211, 47, 47, 0.2);
       display: block;
     }
 
     .status.success {
-      background: #e8f5e9;
-      color: #2e7d32;
+      background: rgba(56, 142, 60, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(56, 142, 60, 0.2);
       display: block;
     }
   </style>
 </head>
 <body>
-  <img src="icon128.png" alt="SCRIBE Voice Input" class="icon">
-  <h1>Microphone Access Required</h1>
-  <p class="description">
-    SCRIBE Voice Input needs access to your microphone to enable voice dictation. 
-    Click the button below to grant microphone access. This is required for the extension to work.
-  </p>
-  <button id="requestPermission" class="button">Grant Microphone Access</button>
-  <div id="status" class="status"></div>
+  <div class="card">
+    <img src="icon128.png" alt="SCRIBE Voice Input" class="icon">
+    <h1>Microphone Access Required</h1>
+    <p class="description">
+      SCRIBE Voice Input needs access to your microphone to enable voice dictation. 
+      Click the button below to grant microphone access. This is required for the extension to work.
+    </p>
+    <button id="requestPermission" class="button">Grant Microphone Access</button>
+    <div id="status" class="status"></div>
+  </div>
 
   <script src="microphone.js"></script>
 </body>
