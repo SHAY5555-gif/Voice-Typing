@@ -31,10 +31,13 @@
     }
 
     body {
-      width: 380px;
+      /* Use full available width to fit both the regular popup and the (narrower) side-panel. */
+      width: 100%;
+      max-width: 380px;
+      box-sizing: border-box;
       height: fit-content;
       max-height: 700px;
-      padding: 20px;
+      padding: 16px;
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       color: var(--text);
@@ -207,13 +210,18 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: var(--background);
-      padding: 16px;
+      background: rgba(0, 0, 0, 0.4);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      padding: 20px;
       z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .modal.open {
-      display: block;
+      display: flex;
       animation: modalFade 0.25s ease-out;
     }
 
@@ -222,57 +230,177 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
     }
 
     .modal-title {
-      font-size: 18px;
+      font-size: 24px;
       font-weight: 600;
       margin: 0;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-title::before {
+      content: "⚙️";
+      font-size: 20px;
     }
 
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 24px;
+      position: relative;
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
       color: var(--text);
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group label[for="apiKey"]::before {
+      content: "🔑";
+      font-size: 16px;
+    }
+
+    .form-group label[for="language"]::before {
+      content: "🌐";
+      font-size: 16px;
     }
 
     .form-group input,
     .form-group select {
       width: 100%;
-      padding: 8px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-size: 14px;
+      padding: 16px;
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.5);
+      transition: all 0.2s ease;
+      color: var(--text);
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 0 4px rgba(123, 77, 255, 0.1);
+    }
+
+    .form-group input[type="password"] {
+      font-family: monospace;
+      letter-spacing: 2px;
+    }
+
+    .checkbox-group {
+      background: rgba(255, 255, 255, 0.3);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .checkbox-group .form-group {
+      margin-bottom: 12px;
+    }
+
+    .checkbox-group .form-group:last-child {
+      margin-bottom: 0;
     }
 
     .form-group input[type="checkbox"] {
-      width: auto;
-      margin-right: 8px;
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .checkbox-label {
+      display: flex !important;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 500 !important;
+      margin-bottom: 0 !important;
+      padding: 8px 0;
+      transition: color 0.2s ease;
+    }
+
+    .checkbox-label:hover {
+      color: var(--primary);
+    }
+
+    .checkbox-label span {
+      flex: 1;
     }
 
     .button {
-      background: var(--primary);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
       color: white;
       border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
+      padding: 16px 32px;
+      border-radius: 12px;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 600;
+      width: 100%;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(123, 77, 255, 0.3);
     }
 
     .button:hover {
-      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(123, 77, 255, 0.4);
+    }
+
+    .button:active {
+      transform: translateY(0);
+    }
+
+    .close-button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: all 0.2s ease;
+    }
+
+    .close-button:hover {
+      background: rgba(255, 0, 0, 0.1);
+      color: var(--error);
+      transform: scale(1.1);
     }
 
     /* History Styles */
@@ -330,6 +458,12 @@
       font-weight: 600;
       margin: 0 0 12px 0;
       color: var(--text);
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title svg {
+      color: var(--primary);
     }
 
     .recording-buttons {
@@ -432,13 +566,246 @@
       line-height: 1.3;
     }
 
+    /* Status Section Styles */
+    .status-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      text-align: left;
+    }
+
+    .status-icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .status-icon svg {
+      transition: all 0.3s ease;
+    }
+
+    .status-text {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* Status states */
+    .status-section.recording .status-icon {
+      background: linear-gradient(135deg, var(--error) 0%, #ff5252 100%);
+      animation: pulse-glow 2s infinite;
+    }
+
+    .status-section.recording .status-icon svg {
+      animation: rotate 2s linear infinite;
+    }
+
+    .status-section.processing .status-icon {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+      animation: pulse-glow 1.5s infinite;
+    }
+
+    .status-section.processing .status-icon svg {
+      animation: spin 1s linear infinite;
+    }
+
+    .status-section.error .status-icon {
+      background: linear-gradient(135deg, var(--error) 0%, #d32f2f 100%);
+    }
+
+    .status-section.error .status-text {
+      color: var(--error);
+    }
+
+    @keyframes pulse-glow {
+      0% { 
+        box-shadow: 0 0 0 0 rgba(123, 77, 255, 0.4);
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 0 8px rgba(123, 77, 255, 0.1);
+        transform: scale(1.05);
+      }
+      100% { 
+        box-shadow: 0 0 0 0 rgba(123, 77, 255, 0.4);
+        transform: scale(1);
+      }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Result Section Styles */
+    .result-section {
+      padding: 0;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 16px 16px 0 16px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+
+    .result-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+    }
+
+    .result-title svg {
+      color: var(--primary);
+    }
+
+    .result-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .result-btn {
+      padding: 8px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--card-border);
+    }
+
+    .result-btn:hover:not(:disabled) {
+      background: rgba(94, 53, 177, 0.1);
+      border-color: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    .result-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .result-container {
+      padding: 16px;
+    }
+
+    .result-text {
+      min-height: 120px;
+      max-height: 200px;
+      padding: 16px;
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.3);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-light);
+      overflow-y: auto;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .result-text:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 0 4px rgba(123, 77, 255, 0.1);
+    }
+
+    .result-text.hasText {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .result-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      min-height: 88px;
+      color: var(--text-light);
+      opacity: 0.7;
+    }
+
+    .result-placeholder p {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    /* Enhanced header styles */
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .title svg {
+      -webkit-text-fill-color: var(--primary);
+    }
+
+    /* Enhanced controls */
+    .text-button {
+      font-size: 14px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+    }
+
+    .text-button svg {
+      color: var(--primary);
+    }
+
   </style>
 </head>
 <body>
   <div class="header">
-    <h1 class="title" data-i18n="popupTitle">Voice Input</h1>
+    <h1 class="title" data-i18n="popupTitle">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+      Voice Input
+    </h1>
     <div class="controls">
-       <button id="historyButton" class="text-button" title="Show/Hide History" data-i18n="historyButton">History</button>
+       <button id="historyButton" class="text-button" title="Show/Hide History" data-i18n="historyButton">
+         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+           <path d="M3 3v5h5"></path>
+           <path d="M12 7v5l4 2"></path>
+         </svg>
+         History
+       </button>
       <button id="helpButton" class="icon-button" title="Help" data-i18n-title="helpTitle">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
@@ -457,7 +824,15 @@
   <!-- Recording Options Section -->
   <section class="card">
     <div class="recording-section">
-      <h3 class="section-title" data-i18n="recordingOptions">Recording Options</h3>
+      <h3 class="section-title" data-i18n="recordingOptions">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+        Recording Options
+      </h3>
       
       <div class="recording-buttons">
         <!-- Microphone Recording -->
@@ -474,23 +849,6 @@
             <div class="btn-content">
               <div class="btn-title" data-i18n="microphoneTitle">Microphone</div>
               <div class="btn-subtitle" data-i18n="microphoneSubtitle">Record from microphone</div>
-            </div>
-          </button>
-        </div>
-
-        <!-- Tab Audio Recording -->
-        <div class="recording-option">
-          <button id="tabRecordButton" class="record-btn secondary">
-            <div class="btn-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="9" cy="9" r="2"></circle>
-                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
-              </svg>
-            </div>
-            <div class="btn-content">
-              <div class="btn-title" data-i18n="tabAudioTitle">Tab Audio</div>
-              <div class="btn-subtitle" data-i18n="tabAudioSubtitle">Record audio from current tab</div>
             </div>
           </button>
         </div>
@@ -516,103 +874,144 @@
     </div>
   </section>
 
-  <div id="status" data-i18n="statusInitial">Click to start recording</div>
+  <!-- Status Section -->
+  <section class="card">
+    <div class="status-section">
+      <div class="status-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M8 12l2 2 4-4"></path>
+        </svg>
+      </div>
+      <div id="status" class="status-text" data-i18n="statusInitial">Click to start recording</div>
+    </div>
+  </section>
   
   <!-- Result Section -->
   <section class="card">
-    <div class="result-container">
-      <div class="result-controls">
-         <button id="editButton" class="icon-button" title="Edit Text" data-i18n-title="editButtonTitle" disabled>
-           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-             <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-           </svg>
-         </button>
-         <button id="copyButton" class="icon-button" title="Copy Text" data-i18n-title="copyButtonTitle" disabled>
-           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-           </svg>
-         </button>
-       </div>
-      <div id="result" contenteditable="false" data-i18n-placeholder="resultPlaceholder">Your transcribed text will appear here</div>
+    <div class="result-section">
+      <div class="result-header">
+        <h3 class="result-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14,2 14,8 20,8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10,9 9,9 8,9"></polyline>
+          </svg>
+          Transcription Result
+        </h3>
+        <div class="result-controls">
+           <button id="editButton" class="icon-button result-btn" title="Edit Text" data-i18n-title="editButtonTitle" disabled>
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+             </svg>
+           </button>
+           <button id="copyButton" class="icon-button result-btn" title="Copy Text" data-i18n-title="copyButtonTitle" disabled>
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+             </svg>
+           </button>
+         </div>
+      </div>
+      <div class="result-container">
+        <div id="result" contenteditable="false" class="result-text" data-i18n-placeholder="resultPlaceholder">
+          <div class="result-placeholder">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.3;">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+            <p>Your transcribed text will appear here</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="modal">
-    <div class="modal-header">
-      <h2 class="modal-title" data-i18n="settingsModalTitle">Settings</h2>
-      <button class="icon-button" data-close-settings>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" data-i18n="settingsModalTitle">Settings</h2>
+        <button class="close-button" data-close-settings title="Close Settings" aria-label="Close Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form id="settingsForm">
+        <div class="form-group">
+          <label for="apiKey" data-i18n="apiKeyLabel">ELEVEN LABS API Key</label>
+          <input type="password" id="apiKey" required placeholder="Enter your API key...">
+        </div>
+        <div class="form-group">
+          <label for="language" data-i18n="languageLabel">Language</label>
+          <select id="language">
+            <option value="auto">Automatic</option>
+            <option value="en">English</option>
+            <option value="he">Hebrew (עברית)</option>
+            <option value="zh">Chinese (中文)</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="it">Italian</option>
+            <option value="pt">Portuguese</option>
+            <option value="pl">Polish</option>
+            <option value="hi">Hindi</option>
+          </select>
+        </div>
+        <div class="checkbox-group">
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="autoInsert" checked>
+              <span data-i18n="autoInsertLabel">Automatically insert text</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="autoCopy">
+              <span data-i18n="autoCopyLabel">Automatically copy text to clipboard</span>
+            </label>
+          </div>
+        </div>
+        <button type="submit" class="button" data-i18n="saveSettingsButton">Save Settings</button>
+      </form>
     </div>
-    <form id="settingsForm">
-      <div class="form-group">
-        <label for="apiKey" data-i18n="apiKeyLabel">ELEVEN LABS API Key</label>
-        <input type="password" id="apiKey" required style="width: 100%; box-sizing: border-box;">
-      </div>
-      <div class="form-group">
-        <label for="language" data-i18n="languageLabel">Language</label>
-        <select id="language">
-          <option value="auto">Automatic</option>
-          <option value="en">English</option>
-          <option value="he">Hebrew (עברית)</option>
-          <option value="zh">Chinese (中文)</option>
-          <option value="es">Spanish</option>
-          <option value="fr">French</option>
-          <option value="de">German</option>
-          <option value="it">Italian</option>
-          <option value="pt">Portuguese</option>
-          <option value="pl">Polish</option>
-          <option value="hi">Hindi</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" id="autoInsert" checked>
-          <span data-i18n="autoInsertLabel">Automatically insert text</span>
-        </label>
-      </div>
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" id="autoCopy">
-          <span data-i18n="autoCopyLabel">Automatically copy text to clipboard</span>
-        </label>
-      </div>
-      <button type="submit" class="button" data-i18n="saveSettingsButton">Save Settings</button>
-    </form>
   </div>
 
   <!-- Help Modal -->
   <div id="helpModal" class="modal">
-    <div class="modal-header">
-      <h2 class="modal-title" data-i18n="helpModalTitle">Help</h2>
-      <button class="icon-button" data-close-help>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-    </div>
-    <div>
-      <p><strong data-i18n="helpGettingStarted">Getting Started:</strong></p>
-      <ol>
-        <li>Enter your ELEVEN LABS API key in Settings</li>
-        <li>Click the microphone button to start recording</li>
-        <li>Speak clearly into your microphone</li>
-        <li>Click again to stop recording</li>
-        <li>Your text will appear and be inserted automatically</li>
-      </ol>
-      <p><strong data-i18n="helpKeyboardShortcut">Keyboard Shortcut:</strong> Alt+Shift+S</p>
-      <p><strong data-i18n="helpTips">Tips:</strong></p>
-      <ul>
-        <li>Speak clearly and at a normal pace</li>
-        <li>Keep background noise to a minimum</li>
-        <li>Click the settings icon to change language or behavior</li>
-      </ul>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" data-i18n="helpModalTitle">Help</h2>
+        <button class="close-button" data-close-help title="Close Help" aria-label="Close Help">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="help-content">
+        <p><strong data-i18n="helpGettingStarted">Getting Started:</strong></p>
+        <ol>
+          <li>Enter your ELEVEN LABS API key in Settings</li>
+          <li>Click the microphone button to start recording</li>
+          <li>Speak clearly into your microphone</li>
+          <li>Click again to stop recording</li>
+          <li>Your text will appear and be inserted automatically</li>
+        </ol>
+        <p><strong data-i18n="helpKeyboardShortcut">Keyboard Shortcut:</strong> Alt+Shift+S</p>
+        <p><strong data-i18n="helpTips">Tips:</strong></p>
+        <ul>
+          <li>Speak clearly and at a normal pace</li>
+          <li>Keep background noise to a minimum</li>
+          <li>Click the settings icon to change language or behavior</li>
+        </ul>
+      </div>
     </div>
   </div>
 
