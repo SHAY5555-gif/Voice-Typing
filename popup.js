@@ -19,6 +19,18 @@ const desktopRecordBtn = document.getElementById('desktopRecordButton');
     const editBtn = document.getElementById('editButton');
     const historyListEl = document.getElementById('historyList');
 
+// --- Ensure modals closed on startup ---
+settingsModal.classList.remove('open');
+helpModal.classList.remove('open');
+
+// --- Always close modals when side-panel/tab becomes visible ---
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    settingsModal.classList.remove('open');
+    helpModal.classList.remove('open');
+  }
+});
+
     // --- Initial Element Checks ---
     if (!recordBtn || !statusEl || !resultEl || !settingsBtn || !helpBtn || !historyBtn || !settingsModal || !helpModal || !historyContainerEl || !settingsForm || !copyBtn || !editBtn || !historyListEl) {
       console.error("Popup Init Error: One or more essential elements not found!");
@@ -295,6 +307,13 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
       isRecording = false;
       recordBtn.classList.remove('recording');
 
+      // Update status section for error state
+      const statusSection = document.querySelector('.status-section');
+      if (statusSection) {
+        statusSection.classList.remove('recording', 'processing');
+        statusSection.classList.add('error');
+      }
+
       // Check if the error is due to permission denial/dismissal or query failure
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         console.log("Popup: Error identified as permission denial/dismissal/query failure. Requesting background to open permission page.");
@@ -389,6 +408,13 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
           statusEl.classList.remove('error');
           statusEl.classList.add('recording');
 
+          // Update status section for recording state
+          const statusSection = document.querySelector('.status-section');
+          if (statusSection) {
+            statusSection.classList.remove('error', 'processing');
+            statusSection.classList.add('recording');
+          }
+
           if (!resultEl.classList.contains('hasText')) {
                resultEl.textContent = getTranslation('resultPlaceholder');
            }
@@ -419,6 +445,13 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
         statusEl.textContent = getTranslation('statusProcessing');
         statusEl.classList.remove('recording');
         statusEl.classList.add('processing');
+
+        // Update status section for processing state
+        const statusSection = document.querySelector('.status-section');
+        if (statusSection) {
+          statusSection.classList.remove('recording', 'error');
+          statusSection.classList.add('processing');
+        }
       } else {
         console.log("Popup: stopRecording called but no active recorder or not recording.");
       }
@@ -511,6 +544,11 @@ async function processTabRecording() {
     const result = await transcribeAudioWithoutEvents(audioBlob);
     statusEl.textContent = getTranslation('statusDone');
     if (result && result.text) {
+      // Hide placeholder and show transcribed text
+      const placeholder = resultEl.querySelector('.result-placeholder');
+      if (placeholder) {
+        placeholder.style.display = 'none';
+      }
       resultEl.textContent = result.text;
       resultEl.classList.add('hasText');
 
@@ -530,7 +568,11 @@ async function processTabRecording() {
             chrome.tabs.sendMessage(tabs[0].id, {
               action: 'insertText',
               text: result.text
-            }, () => {/* ignore errors */});
+            }, (response) => {
+              if (chrome.runtime.lastError) {
+                console.error('Popup: Error sending insertText message (tab):', chrome.runtime.lastError.message);
+              }
+            });
           }
         });
       }
@@ -605,6 +647,11 @@ async function processDesktopRecording() {
     const result = await transcribeAudioWithoutEvents(audioBlob);
     statusEl.textContent = getTranslation('statusDone');
     if (result && result.text) {
+      // Hide placeholder and show transcribed text
+      const placeholder = resultEl.querySelector('.result-placeholder');
+      if (placeholder) {
+        placeholder.style.display = 'none';
+      }
       resultEl.textContent = result.text;
       resultEl.classList.add('hasText');
       saveHistory(result.text);
@@ -661,8 +708,20 @@ async function processRecording() {
         if (result && result.text) {
           const transcribedText = result.text;
           console.log("Popup: Transcription successful:", transcribedText); // Log success
+          
+          // Hide placeholder and show transcribed text
+          const placeholder = resultEl.querySelector('.result-placeholder');
+          if (placeholder) {
+            placeholder.style.display = 'none';
+          }
           resultEl.textContent = transcribedText;
           resultEl.classList.add('hasText');
+
+          // Update status section to show completion
+          const statusSection = document.querySelector('.status-section');
+          if (statusSection) {
+            statusSection.classList.remove('recording', 'error', 'processing');
+          }
 
           if (settings.autoInsert) {
             console.log("Popup: Auto-insert enabled. Sending message to content script."); // Log auto-insert
@@ -675,7 +734,7 @@ async function processRecording() {
                   if (chrome.runtime.lastError) {
                     console.error('Popup: Error sending insertText message:', chrome.runtime.lastError.message);
                   } else {
-                    console.log("Popup: insertText message sent successfully.");
+                    console.log("Popup: Text insertion message sent successfully.");
                   }
                 });
               } else {
@@ -698,7 +757,14 @@ async function processRecording() {
 
         } else {
            console.log("Popup: Transcription result empty or missing text field."); // Log empty result
-           resultEl.textContent = getTranslation('resultPlaceholder');
+           
+           // Show placeholder again
+           const placeholder = resultEl.querySelector('.result-placeholder');
+           if (placeholder) {
+             placeholder.style.display = 'flex';
+           } else {
+             resultEl.innerHTML = '<div class="result-placeholder"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.3;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg><p>' + getTranslation('resultPlaceholder') + '</p></div>';
+           }
            resultEl.classList.remove('hasText');
            if (copyBtn) copyBtn.disabled = true;
            if (editBtn) editBtn.disabled = true;
@@ -710,6 +776,13 @@ async function processRecording() {
         statusEl.classList.remove('processing');
         statusEl.classList.add('error');
 
+        // Update status section for error state
+        const statusSection = document.querySelector('.status-section');
+        if (statusSection) {
+          statusSection.classList.remove('recording', 'processing');
+          statusSection.classList.add('error');
+        }
+
         let errorMessage = 'An unexpected error occurred';
         if (error.message) {
           errorMessage = error.message;
@@ -719,7 +792,13 @@ async function processRecording() {
           errorMessage = error.detail;
         }
 
+        // Hide placeholder and show error message
+        const placeholder = resultEl.querySelector('.result-placeholder');
+        if (placeholder) {
+          placeholder.style.display = 'none';
+        }
         resultEl.textContent = 'Error: ' + errorMessage;
+        resultEl.classList.remove('hasText');
          if (copyBtn) copyBtn.disabled = true;
          if (editBtn) editBtn.disabled = true;
          resultEl.setAttribute('contenteditable', 'false');
@@ -809,7 +888,19 @@ async function processRecording() {
 
     // Copy result text to clipboard
     function copyResultText() {
-      const textToCopy = resultEl.innerText;
+      // Get text content, excluding the placeholder
+      let textToCopy = '';
+      if (resultEl.classList.contains('hasText')) {
+        // Create a temporary element to extract just the text content without the placeholder
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = resultEl.innerHTML;
+        const placeholder = tempDiv.querySelector('.result-placeholder');
+        if (placeholder) {
+          placeholder.remove();
+        }
+        textToCopy = tempDiv.textContent || tempDiv.innerText;
+      }
+
       if (textToCopy && resultEl.classList.contains('hasText')) {
         navigator.clipboard.writeText(textToCopy)
           .then(() => {
