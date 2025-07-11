@@ -116,12 +116,12 @@ document.addEventListener('visibilitychange', () => {
         settingsTitle: "הגדרות",
         recordingOptions: "אפשרויות הקלטה",
         microphoneTitle: "מיקרופון",
-        microphoneSubtitle: "הקלטה ממיקרופון",
+        microphoneSubtitle: "התחל הקלטה מהמיקרופון",
         tabAudioTitle: "אודיו כרטיסייה",
         tabAudioSubtitle: "הקלטת אודיו מהכרטיסייה הנוכחית",
-        desktopAudioTitle: "אודיו שולחן עבודה",
-        desktopAudioSubtitle: "הקלטת אודיו משולחן העבודה",
-        recordButtonStart: "התחל הקלטה",
+        desktopAudioTitle: "שולחן עבודה",
+        desktopAudioSubtitle: "הקלטה משולחן העבודה",
+        recordButtonStart: "מיקרופון",
         recordButtonStop: "עצור הקלטה",
         statusInitial: "לחץ להתחלת הקלטה",
         statusRecording: "מקליט\u200E... לחץ לעצירה",
@@ -995,7 +995,8 @@ async function processRecording() {
     function updateUIText(lang) {
       document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
-        if (element.matches('span, h1, h2, label, button, p, strong, div')) {
+        // Include more heading levels such as h3 and h4 to ensure all translatable text gets updated
+        if (element.matches('span, h1, h2, h3, h4, label, button, p, strong, div')) {
            if (key === 'recordButtonStart' && element.classList.contains('recording-title')) {
                if (!isRecording) {
                    element.textContent = getTranslation(key, lang);
