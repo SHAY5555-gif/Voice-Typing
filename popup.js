@@ -338,9 +338,9 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
       statusEl.classList.add('error');
       statusEl.classList.remove('recording', 'processing');
 
-      const recordButtonSpan = recordBtn.querySelector('span');
-      if (recordButtonSpan) {
-          recordButtonSpan.textContent = getTranslation('recordButtonStart');
+      const recordButtonTitle = recordBtn.querySelector('.recording-title');
+      if (recordButtonTitle) {
+          recordButtonTitle.textContent = getTranslation('recordButtonStart');
       }
 
       console.error('Microphone error in popup (unhandled type):', error.name, error.message);
@@ -400,10 +400,10 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
 
           console.log("Popup: Updating UI for recording state.");
           recordBtn.classList.add('recording');
-          const recordButtonSpan = recordBtn.querySelector('span');
-          if (recordButtonSpan) {
-              recordButtonSpan.textContent = getTranslation('recordButtonStop');
-          }
+            const recordButtonTitle = recordBtn.querySelector('.recording-title');
+  if (recordButtonTitle) {
+    recordButtonTitle.textContent = getTranslation('recordButtonStop');
+  }
           statusEl.textContent = getTranslation('statusRecording');
           statusEl.classList.remove('error');
           statusEl.classList.add('recording');
@@ -438,9 +438,9 @@ if (desktopRecordBtn) desktopRecordBtn.addEventListener('click', toggleDesktopRe
 
         // Update UI immediately to 'Processing'
         recordBtn.classList.remove('recording');
-        const recordButtonSpan = recordBtn.querySelector('span');
-         if (recordButtonSpan) {
-             recordButtonSpan.textContent = getTranslation('recordButtonStart');
+        const recordButtonTitle = recordBtn.querySelector('.recording-title');
+         if (recordButtonTitle) {
+             recordButtonTitle.textContent = getTranslation('recordButtonStart');
          }
         statusEl.textContent = getTranslation('statusProcessing');
         statusEl.classList.remove('recording');
@@ -996,7 +996,7 @@ async function processRecording() {
       document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
         if (element.matches('span, h1, h2, label, button, p, strong, div')) {
-           if (key === 'recordButtonStart' && element.parentElement.id === 'recordButton') {
+           if (key === 'recordButtonStart' && element.classList.contains('recording-title')) {
                if (!isRecording) {
                    element.textContent = getTranslation(key, lang);
                }
@@ -1025,10 +1025,10 @@ async function processRecording() {
        if (!isRecording && !statusEl.classList.contains('processing') && !statusEl.classList.contains('error')) {
           statusEl.textContent = getTranslation('statusInitial', lang);
        }
-       const recordButtonSpan = recordBtn.querySelector('span');
-       if (recordButtonSpan && !isRecording) {
-          recordButtonSpan.textContent = getTranslation('recordButtonStart', lang);
-       }
+         const recordButtonTitle = recordBtn.querySelector('.recording-title');
+  if (recordButtonTitle && !isRecording) {
+    recordButtonTitle.textContent = getTranslation('recordButtonStart', lang);
+  }
        updateHistoryDisplay();
       }
 
