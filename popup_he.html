@@ -307,6 +307,17 @@
     .rtl-layout .result-actions { /* Adjust button container for RTL */
        justify-content: flex-start; /* Align buttons left in RTL */
     }
+    
+    /* NEW: Ensure section titles align properly in RTL */
+    .rtl-layout .section-title {
+       flex-direction: row-reverse; /* Icon on the left, text on the right */
+       justify-content: flex-start; /* Align content to the right in row-reverse */
+       text-align: right;
+    }
+    .rtl-layout .section-title svg {
+       margin-right: 0;
+       margin-left: 8px;
+    }
     .rtl-text {
       direction: rtl;
       text-align: right;
@@ -375,6 +386,18 @@
     .section-title svg {
       color: var(--primary);
       margin-left: 8px;
+    }
+
+    /* Override for RTL: simplify to block element so title aligns fully right */
+    .rtl-layout .section-title {
+      display: block;
+      text-align: right;
+    }
+    /* If SVG present, keep it left of text (right side visually) */
+    .rtl-layout .section-title svg {
+      float: right;
+      margin-left: 8px; /* space between icon and text */
+      margin-right: 0;
     }
 
     .recording-grid {
