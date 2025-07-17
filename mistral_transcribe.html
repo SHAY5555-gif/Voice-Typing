@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mistral Voxtral - Hebrew Audio Transcription</title>
+    <style>
+        * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type="text"], input[type="file"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, input[type="file"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status.loading {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .transcript {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            direction: rtl;
+            text-align: right;
+            line-height: 1.6;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .download-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            margin-top: 10px;
+            width: auto;
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Mistral Voxtral - תמלול קול עברי</h1>
+        
+        <div class="input-section">
+            <label for="apiKey">🔑 מפתח API של Mistral:</label>
+            <input type="text" id="apiKey" placeholder="sk-your-mistral-api-key-here" dir="ltr">
+            <small>קבל מפתח API מ: <a href="https://console.mistral.ai/" target="_blank" rel="noopener">https://console.mistral.ai/</a></small>
+        </div>
+        
+        <div class="input-section">
+            <label for="model">📝 מודל:</label>
+            <!-- אפשר להזין ידנית שם מודל או לבחור מן הרשימה -->
+            <input type="text" id="model" list="modelList" placeholder="voxtral-mini-2507" style="width:100%; padding:12px; border:2px solid #ddd; border-radius:8px;">
+            <datalist id="modelList">
+                <option value="voxtral-small-2507"></option>
+                <option value="voxtral-mini-2507"></option>
+            </datalist>
+            <button type="button" onclick="listAvailableModels()" style="width: auto; margin-top: 10px; padding: 8px 16px; font-size: 14px;">
+                🔍 בדוק מודלים זמינים
+            </button>
+        </div>
+        
+        <div class="input-section">
+            <label for="language">🌍 שפה:</label>
+            <select id="language">
+                <option value="he">עברית</option>
+                <option value="en">English</option>
+                <option value="auto">זיהוי אוטומטי</option>
+            </select>
+        </div>
+        
+        <div class="input-section">
+            <label for="format">📄 פורמט פלט:</label>
+            <select id="format">
+                <option value="json">JSON (מפורט)</option>
+                <option value="txt">טקסט רגיל</option>
+                <option value="srt">כתוביות SRT</option>
+            </select>
+        </div>
+        
+        <div class="input-section">
+            <label for="timestamps">⏰ חותמות זמן:</label>
+            <select id="timestamps">
+                <option value="detailed">מפורט</option>
+                <option value="simple">פשוט</option>
+                <option value="none">ללא</option>
+            </select>
+        </div>
+        
+        <div class="input-section">
+            <label>
+                <input type="checkbox" id="diarization" checked style="width: auto; margin-left: 10px;">
+                🎭 הפרדת דוברים
+            </label>
+        </div>
+        
+        <div class="input-section">
+            <label for="audioFile">🎵 קובץ שמע:</label>
+            <input type="file" id="audioFile" accept="audio/*">
+        </div>
+        
+        <button id="transcribeBtn" onclick="transcribeAudio()">
+            🚀 התחל תמלול
+        </button>
+        
+        <div id="status" class="status hidden"></div>
+        
+        <div id="transcriptSection" class="hidden">
+            <h3>📄 תמלול:</h3>
+            <div id="transcript" class="transcript"></div>
+            <button id="downloadBtn" class="download-btn" onclick="downloadTranscript()">
+                💾 הורד כקובץ טקסט
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentTranscript = '';
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.classList.remove('hidden');
+        }
+        
+        function hideStatus() {
+            document.getElementById('status').classList.add('hidden');
+        }
+        
+        async function listAvailableModels() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!apiKey) {
+                showStatus('אנא הכנס מפתח API כדי לבדוק מודלים', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('בודק מודלים זמינים...', 'loading');
+                
+                const response = await fetch('https://api.mistral.ai/v1/models', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error (${response.status})`);
+                }
+                
+                const data = await response.json();
+                console.log('Available models:', data);
+                
+                // Update model dropdown with available models
+                const modelSelect = document.getElementById('model');
+                modelSelect.innerHTML = ''; // Clear existing options
+                
+                // Filter for audio/multimodal models
+                const audioModels = data.data.filter(model => 
+                    model.id.includes('voxtral') || 
+                    model.id.includes('pixtral') || 
+                    model.id.includes('multimodal')
+                );
+                
+                if (audioModels.length === 0) {
+                    // If no audio models, show all models
+                    data.data.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.id;
+                        option.textContent = model.id;
+                        modelSelect.appendChild(option);
+                    });
+                } else {
+                    audioModels.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.id;
+                        option.textContent = model.id;
+                        modelSelect.appendChild(option);
+                    });
+                }
+                
+                showStatus(`✅ נמצאו ${data.data.length} מודלים זמינים`, 'success');
+                
+            } catch (error) {
+                showStatus(`❌ שגיאה בבדיקת מודלים: ${error.message}`, 'error');
+                console.error('Error listing models:', error);
+            }
+        }
+        
+        async function transcribeAudio() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const model = document.getElementById('model').value;
+            const audioFile = document.getElementById('audioFile').files[0];
+            const language = document.getElementById('language').value;
+            const format = document.getElementById('format').value;
+            const timestamps = document.getElementById('timestamps').value;
+            const diarization = document.getElementById('diarization').checked;
+            const transcribeBtn = document.getElementById('transcribeBtn');
+            const transcriptSection = document.getElementById('transcriptSection');
+            
+            // Validation
+            if (!apiKey) {
+                showStatus('אנא הכנס מפתח API', 'error');
+                return;
+            }
+            
+            if (!audioFile) {
+                showStatus('אנא בחר קובץ שמע', 'error');
+                return;
+            }
+            
+            // Show loading state
+            transcribeBtn.disabled = true;
+            transcribeBtn.textContent = '⏳ מעבד...';
+            showStatus('מכין קובץ שמע...', 'loading');
+            transcriptSection.classList.add('hidden');
+            
+            try {
+                showStatus('שולח לשרת Mistral...', 'loading');
+                
+                // Prepare FormData for multipart request
+                const formData = new FormData();
+                formData.append('file', audioFile);
+                formData.append('model', model);
+                
+                // Add optional parameters only if not default
+                if (language !== 'auto') {
+                    formData.append('language', language);
+                }
+                if (format !== 'txt') {
+                    formData.append('format', format);
+                }
+                if (timestamps !== 'none') {
+                    formData.append('timestamps', timestamps);
+                }
+                if (diarization) {
+                    formData.append('diarization', 'true');
+                }
+                
+                console.log('Request details:', {
+                    model: model,
+                    audioSize: audioFile.size,
+                    audioType: audioFile.type,
+                    language: language,
+                    format: format,
+                    timestamps: timestamps,
+                    diarization: diarization
+                });
+                
+                // Send request to Mistral Audio API
+                const response = await fetch('https://api.mistral.ai/v1/audio/transcriptions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                        // Don't set Content-Type - let browser handle multipart boundary
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    let errorMessage = `API Error (${response.status})`;
+                    try {
+                        const errorData = await response.json();
+                        console.error('API Error Response:', errorData);
+                        errorMessage += `: ${errorData.error?.message || errorData.message || JSON.stringify(errorData)}`;
+                    } catch (e) {
+                        const errorText = await response.text();
+                        console.error('API Error Text:', errorText);
+                        errorMessage += `: ${errorText || 'Unknown error'}`;
+                    }
+                    throw new Error(errorMessage);
+                }
+                
+                const data = await response.json();
+                currentTranscript = data.text; // Use data.text instead of data.choices[0].message.content
+                
+                // Display results
+                document.getElementById('transcript').textContent = currentTranscript;
+                transcriptSection.classList.remove('hidden');
+                showStatus('✅ תמלול הושלם בהצלחה!', 'success');
+                
+            } catch (error) {
+                showStatus(`❌ שגיאה: ${error.message}`, 'error');
+                console.error('Transcription error:', error);
+            } finally {
+                // Reset button
+                transcribeBtn.disabled = false;
+                transcribeBtn.textContent = '🚀 התחל תמלול';
+            }
+        }
+        
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // Remove data:audio/...;base64, prefix
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function downloadTranscript() {
+            if (!currentTranscript) return;
+            
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const format = document.getElementById('format').value;
+            
+            let filename, mimeType;
+            switch (format) {
+                case 'srt':
+                    filename = `transcript_${timestamp}.srt`;
+                    mimeType = 'text/plain;charset=utf-8';
+                    break;
+                case 'json':
+                    filename = `transcript_${timestamp}.json`;
+                    mimeType = 'application/json;charset=utf-8';
+                    break;
+                case 'txt':
+                default:
+                    filename = `transcript_${timestamp}.txt`;
+                    mimeType = 'text/plain;charset=utf-8';
+                    break;
+            }
+            
+            const blob = new Blob([currentTranscript], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Enable Enter key for transcription
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('transcribeBtn').disabled) {
+                transcribeAudio();
+            }
+        });
+    </script>
+</body>
+</html>
