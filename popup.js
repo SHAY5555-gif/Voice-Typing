@@ -812,7 +812,7 @@ async function processRecording() {
       formData.append('file', audioBlob, 'audio.webm'); // Added filename
       formData.append('model_id', 'scribe_v1');
       // Removed unnecessary parameters as per API docs for basic transcription
-      // formData.append('tag_audio_events', 'false');
+      formData.append('tag_audio_events', 'false');
       // formData.append('timestamps_granularity', 'none');
       // formData.append('diarize', 'false');
 
