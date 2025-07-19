@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SCRIBE Voice Input",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "Use your voice to dictate text into any text field with ELEVEN LABS SCRIBE API",
   "icons": {
     "16": "icon16.png",
