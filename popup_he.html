@@ -857,22 +857,8 @@
   <section class="card">
     <div class="result-section">
       <div class="result-header">
-        <div class="result-controls">
-           <button id="editButton" class="icon-button result-btn" title="Edit Text" data-i18n-title="editButtonTitle" disabled>
-             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-             </svg>
-           </button>
-           <button id="copyButton" class="icon-button result-btn" title="Copy Text" data-i18n-title="copyButtonTitle" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-          </button>
-        </div>
         <h3 class="result-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14,2 14,8 20,8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -881,6 +867,19 @@
           </svg>
           תוצאת התמלול
         </h3>
+        <div class="result-controls">
+           <button id="editButton" class="icon-button result-btn" title="ערוך טקסט" data-i18n-title="editButtonTitle">
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+             </svg>
+           </button>
+           <button id="copyButton" class="icon-button result-btn" title="העתק טקסט" data-i18n-title="copyButtonTitle">
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+             </svg>
+           </button>
+         </div>
       </div>
       <div class="result-container">
         <div id="result" class="result-text" data-i18n-placeholder="resultPlaceholder">
