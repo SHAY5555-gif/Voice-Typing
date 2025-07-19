@@ -92,6 +92,7 @@ document.addEventListener('visibilitychange', () => {
         resultPlaceholder: "Your transcribed text will appear here",
         copyButtonTitle: "Copy Text",
         editButtonTitle: "Edit Text",
+        transcriptionResultTitle: "Transcription Result",
         settingsModalTitle: "Settings",
         apiKeyLabel: "ELEVEN LABS API Key",
         languageLabel: "Language",
@@ -135,6 +136,7 @@ document.addEventListener('visibilitychange', () => {
         resultPlaceholder: "הטקסט המתומלל יופיע כאן",
         copyButtonTitle: "העתק טקסט",
         editButtonTitle: "ערוך טקסט",
+        transcriptionResultTitle: "תוצאת התמלול",
         settingsModalTitle: "הגדרות",
         apiKeyLabel: "מפתח API של ELEVEN LABS",
         languageLabel: "שפה",
@@ -544,6 +546,14 @@ async function processTabRecording() {
     const result = await transcribeAudioWithoutEvents(audioBlob);
     statusEl.textContent = getTranslation('statusDone');
     if (result && result.text) {
+      // --- Set text direction based on detected language ---
+      if (settings.language === 'auto' && result.language) {
+        if (isRtlLang(result.language)) {
+          resultEl.classList.add('rtl-text');
+        } else {
+          resultEl.classList.remove('rtl-text');
+        }
+      }
       // Hide placeholder and show transcribed text
       const placeholder = resultEl.querySelector('.result-placeholder');
       if (placeholder) {
@@ -647,6 +657,14 @@ async function processDesktopRecording() {
     const result = await transcribeAudioWithoutEvents(audioBlob);
     statusEl.textContent = getTranslation('statusDone');
     if (result && result.text) {
+      // --- Set text direction based on detected language ---
+      if (settings.language === 'auto' && result.language) {
+        if (isRtlLang(result.language)) {
+          resultEl.classList.add('rtl-text');
+        } else {
+          resultEl.classList.remove('rtl-text');
+        }
+      }
       // Hide placeholder and show transcribed text
       const placeholder = resultEl.querySelector('.result-placeholder');
       if (placeholder) {
@@ -707,7 +725,16 @@ async function processRecording() {
 
         if (result && result.text) {
           const transcribedText = result.text;
-          console.log("Popup: Transcription successful:", transcribedText); // Log success
+          console.log(`Popup: Transcription successful. Text: "${transcribedText}"`);
+
+          // --- Set text direction based on detected language from the text content ---
+          if (settings.language === 'auto') {
+            if (isRtlText(transcribedText)) {
+              resultEl.classList.add('rtl-text');
+            } else {
+              resultEl.classList.remove('rtl-text');
+            }
+          }
           
           // Hide placeholder and show transcribed text
           const placeholder = resultEl.querySelector('.result-placeholder');
@@ -812,7 +839,6 @@ async function processRecording() {
       formData.append('file', audioBlob, 'audio.webm'); // Added filename
       formData.append('model_id', 'scribe_v1');
       // Removed unnecessary parameters as per API docs for basic transcription
-      formData.append('tag_audio_events', 'false');
       // formData.append('timestamps_granularity', 'none');
       // formData.append('diarize', 'false');
 
@@ -822,7 +848,7 @@ async function processRecording() {
         console.log(`Popup: Sending specific language code: ${languageCode}`); // Log language
         formData.append('language_code', languageCode);
       } else {
-        console.log("Popup: Using automatic language detection (language_code omitted)."); // Log auto detection
+        console.log("Popup: Using automatic language detection."); // Log auto detection
       }
 
       console.log("Popup: Making API request to Eleven Labs..."); // Log API request start
@@ -969,6 +995,14 @@ async function processRecording() {
           historyListEl.appendChild(li);
         });
       }
+    }
+
+    // --- RTL Language Detection from Text Content ---
+    function isRtlText(text) {
+        // This regex checks for a substantial presence of Hebrew or Arabic characters.
+        // It looks for at least one character in the RTL scripts.
+        const rtlRegex = /[\u0590-\u05FF\u0600-\u06FF]/;
+        return rtlRegex.test(text);
     }
 
     // Apply RTL styles
