@@ -88,7 +88,7 @@ try {
   parts.push(`--${boundary}`);
   parts.push('Content-Disposition: form-data; name="model_id"');
   parts.push('');
-  parts.push('scribe_v1');
+  parts.push('scribe_v1_experimental');
   
   // Add tag_audio_events field
   parts.push(`--${boundary}`);
