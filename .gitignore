@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+artifacts
 .env
 .env.*
 !.env.example
@@ -18,6 +19,9 @@ dist-ssr
 *.pem
 *.p12
 *.pfx
+transcript_*.txt
+temp_audio_file.mp4
+extension.zip
 
 # Editor directories and files
 .vscode/*

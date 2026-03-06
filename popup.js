@@ -506,7 +506,7 @@ function startTabRecording() {
       tabPlayback = new Audio();
       tabPlayback.srcObject = stream;
       tabPlayback.volume = 1;
-      // play() returns a promise – ignore rejection if autoplay blocked
+      // play() returns a promise - ignore rejection if autoplay blocked
       tabPlayback.play().catch(() => {});
     } catch (e) { console.warn('Could not start tab playback', e); }
 

@@ -1,11 +1,148 @@
 <!doctype html>
-<title>Privacy Policy – Voice Dictation for ElevenLabs</title>
-<h1>Privacy Policy</h1>
-<p>
-This Chrome extension lets you dictate text with your voice. Your microphone
-audio is sent over HTTPS to the ElevenLabs Scribe API solely to obtain a text
-transcription. We do not collect, store, or share personal data. The audio is
-discarded as soon as transcription is complete. No analytics, no advertising,
-no third-party data sales.
-</p>
-<p>Contact: ym422134@gmail.com</p>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy | Voice Typing</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --text: #18202b;
+        --muted: #4a5565;
+        --border: #d7dee8;
+        --accent: #2457ff;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #10141c;
+          --card: #161c27;
+          --text: #eef2f7;
+          --muted: #a9b3c3;
+          --border: #253044;
+          --accent: #82a0ff;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(180deg, var(--bg), #dfe8ff);
+        color: var(--text);
+      }
+
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 48px 20px 64px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 32px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+      }
+
+      h1,
+      h2 {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 2.25rem;
+        margin-bottom: 12px;
+      }
+
+      h2 {
+        font-size: 1.15rem;
+        margin-top: 28px;
+      }
+
+      p,
+      li {
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      ul {
+        padding-left: 22px;
+      }
+
+      .eyebrow {
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        margin-bottom: 12px;
+      }
+
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="card">
+        <div class="eyebrow">Voice Typing</div>
+        <h1>Privacy Policy</h1>
+        <p>
+          Voice Typing is a Chrome extension that sends audio to the ElevenLabs
+          Scribe API only to generate a transcription for the user who started
+          the recording.
+        </p>
+
+        <h2>What data the extension uses</h2>
+        <ul>
+          <li>Microphone audio when you choose microphone recording.</li>
+          <li>Tab audio when you choose tab capture.</li>
+          <li>Desktop audio when you choose desktop capture.</li>
+          <li>Your ElevenLabs API key, stored in Chrome extension storage.</li>
+        </ul>
+
+        <h2>How data is used</h2>
+        <p>
+          Audio is transmitted over HTTPS to ElevenLabs to create a transcript.
+          The extension does not run its own analytics, ad tracking, or data
+          resale pipeline.
+        </p>
+
+        <h2>What is stored locally</h2>
+        <p>
+          The extension stores user settings such as selected language, auto
+          insert preference, auto copy preference, recent transcription history,
+          and the API key needed to call ElevenLabs.
+        </p>
+
+        <h2>What is not collected by this repository</h2>
+        <p>
+          This open source project does not include any backend service for
+          collecting transcripts, microphone recordings, or account data from
+          users.
+        </p>
+
+        <h2>Third-party services</h2>
+        <p>
+          Transcription requests are handled by ElevenLabs. Review their terms
+          and privacy practices before using the extension in production or with
+          sensitive audio.
+        </p>
+
+        <h2>Contact</h2>
+        <p>
+          For privacy or security questions, contact
+          <a href="mailto:ym422134@gmail.com">ym422134@gmail.com</a>.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

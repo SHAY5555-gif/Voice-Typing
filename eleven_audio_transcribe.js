@@ -16,20 +16,20 @@ import path from 'node:path';
 import https from 'node:https';
 import { URL } from 'node:url';
 
-// ────────────────────────────────────────────────────────────
+// ------------------------------------------------------------
 // CLI args
-// ────────────────────────────────────────────────────────────
+// ------------------------------------------------------------
 const [, , audioPath, langArg] = process.argv;
 if (!audioPath) {
   console.error('Usage: node eleven_audio_transcribe.js <audio-file> [language_code]');
   console.error('Example: node eleven_audio_transcribe.js ./recording.wav he');
   process.exit(1);
 }
-const languageCode = langArg || null; // null ⇒ auto-detect
+const languageCode = langArg || null; // null means auto-detect
 
-// ────────────────────────────────────────────────────────────
+// ------------------------------------------------------------
 // Load .env if present (simple parser, no external deps)
-// ────────────────────────────────────────────────────────────
+// ------------------------------------------------------------
 const dotenvPath = path.resolve('.env');
 if (!process.env.XI_API_KEY && fs.existsSync(dotenvPath)) {
   try {
@@ -48,9 +48,9 @@ if (!process.env.XI_API_KEY && fs.existsSync(dotenvPath)) {
   } catch {}
 }
 
-// ────────────────────────────────────────────────────────────
+// ------------------------------------------------------------
 // Env + sanity checks
-// ────────────────────────────────────────────────────────────
+// ------------------------------------------------------------
 let apiKey = process.env.XI_API_KEY || process.env.ELEVEN_LABS_API_KEY || process.env.ELEVENLABS_API_KEY || process.env.ELEVEN_API_KEY;
 // If still undefined, attempt heuristic: first env var containing ELEVEN and API
 if (!apiKey) {
@@ -62,17 +62,17 @@ if (!apiKey) {
   }
 }
 if (!apiKey) {
-  console.error('❌  Missing XI_API_KEY (ElevenLabs) environment variable.');
+  console.error('ERROR: Missing XI_API_KEY (ElevenLabs) environment variable.');
   process.exit(1);
 }
 if (!fs.existsSync(audioPath)) {
-  console.error(`❌  Audio file not found: ${audioPath}`);
+  console.error(`ERROR: Audio file not found: ${audioPath}`);
   process.exit(1);
 }
 
-// ────────────────────────────────────────────────────────────
+// ------------------------------------------------------------
 // Build multipart/form-data request
-// ────────────────────────────────────────────────────────────
+// ------------------------------------------------------------
 // Copy file to temporary ASCII-safe location to avoid Unicode path issues
 const tempPath = path.join(process.cwd(), 'temp_audio_file.mp4');
 try {
@@ -121,10 +121,10 @@ try {
   ];
   const body = Buffer.concat(bodyParts);
 
-  console.log('🚀 Requesting transcription…');
-  console.log(`• Audio file: ${audioPath}`);
-  if (languageCode) console.log(`• Language:   ${languageCode}`);
-  else console.log('• Language:   auto-detect');
+  console.log('Requesting transcription...');
+  console.log(`Audio file: ${audioPath}`);
+  if (languageCode) console.log(`Language:   ${languageCode}`);
+  else console.log('Language:   auto-detect');
 
   const endpoint = new URL('https://api.elevenlabs.io/v1/speech-to-text');
 
@@ -161,7 +161,7 @@ try {
   });
 
   if (response.statusCode !== 200) {
-    throw new Error(`HTTP ${response.statusCode} – ${response.data}`);
+    throw new Error(`HTTP ${response.statusCode} - ${response.data}`);
   }
 
   const data = JSON.parse(response.data);
@@ -173,9 +173,9 @@ try {
 
   const out = `transcript_${Date.now()}.txt`;
   fs.writeFileSync(out, transcript, 'utf8');
-  console.log(`💾 Saved to ${out}`);
+  console.log(`Saved to ${out}`);
 } catch (err) {
-  console.error('❌  Transcription failed:', err.message);
+  console.error('ERROR: Transcription failed:', err.message);
   process.exit(1);
 } finally {
   // Clean up temporary file

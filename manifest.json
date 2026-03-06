@@ -1,14 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "SCRIBE Voice Input",
+  "name": "Voice Typing",
   "version": "2.0.0",
-  "description": "Use your voice to dictate text into any text field with ELEVEN LABS SCRIBE API",
+  "description": "Use your voice to dictate text into text fields with ElevenLabs Scribe.",
+  "homepage_url": "https://github.com/SHAY5555-gif/Voice-Typing",
   "icons": {
     "16": "icon16.png",
     "48": "icon48.png",
     "128": "icon128.png"
   },
   "action": {
+    "default_title": "Voice Typing",
     "default_icon": {
       "16": "icon16.png",
       "48": "icon48.png",
